@@ -116,6 +116,8 @@ const renderBlock = (block) => {
     case "quote":
       return <blockquote key={id}>{value.text[0].plain_text}</blockquote>;
     case "code":
+      const code = value.text[0]?.plain_text;
+      const lang = value.language;
       return (
         <div key={id}
           style={{
@@ -130,11 +132,11 @@ const renderBlock = (block) => {
               }`}
           >
             <code
+            dangerouslySetInnerHTML={{__html: Prism.highlight(code, Prism.languages[lang], value.language)}}
               className={`language-${value.language === "javascript" ? "jsx" : value.language
                 }`}
-            >
-              {value.text[0].plain_text}
-            </code>
+            />
+              
           </pre>
         </div>
       );
@@ -196,10 +198,6 @@ export default function Post({ page, blocks }) {
   if (!page || !blocks) {
     return <div />;
   }
-
-  React.useEffect(() => {
-    Prism.highlightAll();
-  }, []);
 
   let eArr = blocks[Symbol.iterator]();
   const lexer = new Lexer(eArr);
