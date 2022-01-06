@@ -1,6 +1,5 @@
 import React from "react";
 
-
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
@@ -17,18 +16,17 @@ export function Cursor({ typing, className }) {
         };
     }, []);
 
-    return (
-        <span className={className}>{typing ? "|" : toggler ? "|" : ""}</span>
-    );
+    return <span className={className}>{typing ? "|" : toggler ? "|" : ""}</span>;
 }
 
-const initialState = { eventQueue: [], text: "" };
+const initialState = { eventQueue: [], text: "", history: [] };
 
 const TW_ACTIONS = {
     CONSUME: "consume",
     SET_TEXT: "set_text",
     APPEND_CHARACTER: "append_character",
     DELETE_CHARACTER: "delete_character",
+    HISTORIZE_CURRENT: "historize_current"
 };
 
 const TW_EVENT = {
@@ -37,27 +35,25 @@ const TW_EVENT = {
     DELETE_CHARACTER: "delete_some",
     TYPE: "type",
     PAUSE: "pause",
+    HISTORIZE: "historize"
 };
 
 function reducer(state, action) {
     switch (action.type) {
         case TW_EVENT.TYPE:
-            const events = action.payload
-                .split("")
-                .map((character) => ({
-                    event: TW_EVENT.TYPE_CHARACTER,
-                    value: character,
-                }));
+            const events = action.payload.split("").map((character) => ({
+                event: TW_EVENT.TYPE_CHARACTER,
+                value: character,
+            }));
             return { ...state, eventQueue: [...state.eventQueue, ...events] };
         case TW_EVENT.DELETE_CHARACTER: {
             const events = [];
             for (let i = 0; i < action.payload; ++i) {
                 events.push({
-                    event: TW_EVENT.DELETE_CHARACTER
-                })
+                    event: TW_EVENT.DELETE_CHARACTER,
+                });
             }
             return { ...state, eventQueue: [...state.eventQueue, ...events] };
-
         }
         case TW_EVENT.DELETE_ALL:
             return {
@@ -76,8 +72,8 @@ function reducer(state, action) {
         case TW_ACTIONS.SET_TEXT: {
             return {
                 ...state,
-                text: action.payload
-            }
+                text: action.payload,
+            };
         }
         case TW_EVENT.PAUSE: {
             return {
@@ -86,29 +82,53 @@ function reducer(state, action) {
                     ...state.eventQueue,
                     { event: TW_EVENT.PAUSE, value: action.payload },
                 ],
+            };
+        }
+        case TW_EVENT.HISTORIZE: {
+            return {
+                ...state,
+                eventQueue: [
+                    ...state.eventQueue,
+                    { event: TW_EVENT.HISTORIZE },
+                ],
+            }
+        }
+        case TW_ACTIONS.HISTORIZE_CURRENT: {
+            return {
+                ...state,
+                history: [...state.history, state.text],
+                text: ""
             }
         }
         case TW_ACTIONS.APPEND_CHARACTER: {
             return {
                 ...state,
-                text: state.text + action.payload
-            }
+                text: state.text + action.payload,
+            };
         }
         case TW_ACTIONS.DELETE_CHARACTER: {
             return {
                 ...state,
                 text: state.text.slice(0, -1),
-            }
+            };
         }
         default:
             throw new Error();
     }
 }
 
-function useTypewriterEffect() {
-    const [state, dispatch] = React.useReducer(reducer, initialState);
+function useTypewriterEffect(initialText) {
+    const [state, dispatch] = React.useReducer(reducer, {
+        ...initialState,
+        eventQueue: initialText
+            ? initialText.split("").map((character) => ({
+                event: TW_EVENT.TYPE_CHARACTER,
+                value: character,
+            }))
+            : [],
+    });
 
-    const { eventQueue, text } = state;
+    const { eventQueue, text, history } = state;
     const lastFrameRef = React.useRef();
     const pauseTimeRef = React.useRef();
 
@@ -127,8 +147,7 @@ function useTypewriterEffect() {
             const now = Date.now();
             const delta = now - lastFrameRef.current;
 
-
-            if(pauseTimeRef.current && pauseTimeRef.current > now) {
+            if (pauseTimeRef.current && pauseTimeRef.current > now) {
                 return;
             } else {
                 pauseTimeRef.current = null;
@@ -141,15 +160,17 @@ function useTypewriterEffect() {
 
             if (actualEvent.event === TW_EVENT.PAUSE) {
                 pauseTimeRef.current = now + actualEvent.value;
-            }
-            else if (actualEvent.event === TW_EVENT.TYPE_CHARACTER) {
-                dispatch({ type: TW_ACTIONS.APPEND_CHARACTER, payload: actualEvent.value })
-            }
-            else if (actualEvent.event === TW_EVENT.DELETE_ALL) {
-                dispatch({ type: TW_ACTIONS.SET_TEXT, payload: "" })
-            }
-            else if (actualEvent.event === TW_EVENT.DELETE_CHARACTER) {
-                dispatch({ type: TW_ACTIONS.DELETE_CHARACTER })
+            } else if (actualEvent.event === TW_EVENT.TYPE_CHARACTER) {
+                dispatch({
+                    type: TW_ACTIONS.APPEND_CHARACTER,
+                    payload: actualEvent.value,
+                });
+            } else if (actualEvent.event === TW_EVENT.DELETE_ALL) {
+                dispatch({ type: TW_ACTIONS.SET_TEXT, payload: "" });
+            } else if (actualEvent.event === TW_EVENT.DELETE_CHARACTER) {
+                dispatch({ type: TW_ACTIONS.DELETE_CHARACTER });
+            } else if (actualEvent.event === TW_EVENT.HISTORIZE) {
+                dispatch({ type: TW_ACTIONS.HISTORIZE_CURRENT });
             }
 
             dispatch({ type: TW_ACTIONS.CONSUME });
@@ -160,7 +181,7 @@ function useTypewriterEffect() {
         return () => cancelAnimationFrame(raf);
     }, [eventQueue]);
 
-    return [text, dispatch, eventQueue.length !== 0 && !pauseTimeRef.current];
+    return [text, dispatch, eventQueue.length !== 0 && !pauseTimeRef.current, history];
 }
 
 export function type(dispatch, character) {
@@ -171,13 +192,16 @@ export function deleteAll(dispatch) {
     dispatch({ type: TW_EVENT.DELETE_ALL });
 }
 
-
 export function deleteSome(dispatch, number) {
     dispatch({ type: TW_EVENT.DELETE_CHARACTER, payload: number });
 }
 
 export function pauseFor(dispatch, number) {
     dispatch({ type: TW_EVENT.PAUSE, payload: number });
+}
+
+export function historize(dispatch) {
+    dispatch({ type: TW_EVENT.HISTORIZE });
 }
 
 export default useTypewriterEffect;

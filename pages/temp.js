@@ -4,6 +4,7 @@ import useTypewriterEffect, {
   Cursor,
   deleteAll,
   deleteSome,
+  historize,
   pauseFor,
   type,
 } from "../components/useTypewriterEffect";
@@ -11,26 +12,41 @@ import typewriterStyles from "../components/Typewriter.module.css";
 
 function temp() {
   const [state, dispatch, isTyping] = useTypewriterEffect();
-  const [toType, setToType] = React.useState("");
+  //const [toType, setToType] = React.useState("");
 
   React.useEffect(() => {
-    type(dispatch, "hello world!");
-    pauseFor(dispatch, 3000);
-    deleteSome(dispatch, 6);
-    type(dispatch, "universe!!");
+    type(dispatch, "Hello my name is Vincent!\n");
+    pauseFor(dispatch, 500);
+    type(dispatch, " I'm a cs student");
+    deleteSome(dispatch, 10);
+    type(dispatch, "software engineer\n");
+    pauseFor(dispatch, 500);
+    type(dispatch, "Welcome to my website :)!");
   }, []);
 
+  const sentences = state.split("\n");
+  const lastSentence = sentences.pop();
   return (
     <main className={styles.container}>
-      <input value={toType} onChange={(e) => setToType(e.target.value)} />
-      <button onClick={() => type(dispatch, toType)}>type</button>
-      <button onClick={() => deleteAll(dispatch)}>delete all</button>
-      <button onClick={() => deleteSome(dispatch, 5)}>delete some</button>
-
-      <p className={typewriterStyles.shell}>
-        {state}
-        <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
-      </p>
+      {/*<form
+        onSubmit={(e) => {
+          e.preventDefault();
+          type(dispatch, toType);
+          setToType("");
+        }}
+      >
+        <input value={toType} onChange={(e) => setToType(e.target.value)} />
+        <button>OK</button>
+    </form>*/}
+      <div className={typewriterStyles.shell}>
+        {sentences.map((sen, i) => (
+          <p key={i}>{sen}</p>
+        ))}
+        <p>
+          {lastSentence}
+          <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
+        </p>
+      </div>
     </main>
   );
 }
