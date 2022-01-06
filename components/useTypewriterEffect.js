@@ -109,38 +109,40 @@ function useTypewriterEffect() {
     const [state, dispatch] = React.useReducer(reducer, initialState);
 
     const { eventQueue, text } = state;
+    const lastFrameRef = React.useRef();
+    const pauseTimeRef = React.useRef();
+
     React.useEffect(() => {
-        let lastFrame;
-        let pauseTime;
         function step() {
             if (!eventQueue.length) {
                 return;
             }
             raf = requestAnimationFrame(step);
+
             const actualEvent = eventQueue[0];
 
-            if (!lastFrame) {
-                lastFrame = Date.now();
+            if (!lastFrameRef.current) {
+                lastFrameRef.current = Date.now();
             }
             const now = Date.now();
-            const delta = now - lastFrame;
-            if (actualEvent.event === TW_EVENT.PAUSE) {
-                pauseTime = now.setSeconds(now.getSeconds() + actualEvent.value);
-                dispatch({ type: TW_ACTIONS.CONSUME });
+            const delta = now - lastFrameRef.current;
+
+
+            if(pauseTimeRef.current && pauseTimeRef.current > now) {
                 return;
-            }
-            if(pauseTime != null) {
-                if(now < pauseTime) {
-                    return;
-                }
-                pauseTime = null;
+            } else {
+                pauseTimeRef.current = null;
             }
             const feelsNatural = getRandomArbitrary(60, 120);
             if (delta < feelsNatural) {
                 return;
             }
-            lastFrame = now;
-            if (actualEvent.event === TW_EVENT.TYPE_CHARACTER) {
+            lastFrameRef.current = now;
+
+            if (actualEvent.event === TW_EVENT.PAUSE) {
+                pauseTimeRef.current = now + actualEvent.value;
+            }
+            else if (actualEvent.event === TW_EVENT.TYPE_CHARACTER) {
                 dispatch({ type: TW_ACTIONS.APPEND_CHARACTER, payload: actualEvent.value })
             }
             else if (actualEvent.event === TW_EVENT.DELETE_ALL) {
@@ -149,6 +151,7 @@ function useTypewriterEffect() {
             else if (actualEvent.event === TW_EVENT.DELETE_CHARACTER) {
                 dispatch({ type: TW_ACTIONS.DELETE_CHARACTER })
             }
+
             dispatch({ type: TW_ACTIONS.CONSUME });
         }
 
@@ -157,7 +160,7 @@ function useTypewriterEffect() {
         return () => cancelAnimationFrame(raf);
     }, [eventQueue]);
 
-    return [text, dispatch, eventQueue.length !== 0];
+    return [text, dispatch, eventQueue.length !== 0 && !pauseTimeRef.current];
 }
 
 export function type(dispatch, character) {
