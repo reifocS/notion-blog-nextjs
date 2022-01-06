@@ -1,54 +1,50 @@
 import styles from "./index.module.css";
 import React from "react";
 import useTypewriterEffect, {
-  Cursor,
-  deleteAll,
-  deleteSome,
-  historize,
-  pauseFor,
-  type,
+    Cursor,
+    getTypewriter,
 } from "../components/useTypewriterEffect";
 import typewriterStyles from "../components/Typewriter.module.css";
 
 function temp() {
-  const [state, dispatch, isTyping] = useTypewriterEffect();
-  //const [toType, setToType] = React.useState("");
+    const [state, dispatch, isTyping] = useTypewriterEffect();
+    const [state2, dispatch2, isTyping2] = useTypewriterEffect();
 
-  React.useEffect(() => {
-    type(dispatch, "Hello my name is Vincent!\n");
-    pauseFor(dispatch, 500);
-    type(dispatch, " I'm a cs student");
-    deleteSome(dispatch, 10);
-    type(dispatch, "software engineer\n");
-    pauseFor(dispatch, 500);
-    type(dispatch, "Welcome to my website :)!");
-  }, []);
+    React.useEffect(() => {
+        getTypewriter(dispatch).type("Hello world!")
+            .pauseFor(1000)
+            .type(" How are you?")
+            .deleteSome(30)
+            .setLoop(true)
+            .trigger();
 
-  const sentences = state.split("\n");
-  const lastSentence = sentences.pop();
-  return (
-    <main className={styles.container}>
-      {/*<form
-        onSubmit={(e) => {
-          e.preventDefault();
-          type(dispatch, toType);
-          setToType("");
-        }}
-      >
-        <input value={toType} onChange={(e) => setToType(e.target.value)} />
-        <button>OK</button>
-    </form>*/}
-      <div className={typewriterStyles.shell}>
-        {sentences.map((sen, i) => (
-          <p key={i}>{sen}</p>
-        ))}
-        <p>
-          {lastSentence}
-          <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
-        </p>
-      </div>
-    </main>
-  );
+        getTypewriter(dispatch2).type("Hello universe!")
+            .pauseFor(1000)
+            .type(" How are you?")
+            .deleteSome(30)
+            .setLoop(true)
+            .trigger();
+    }, [dispatch, dispatch2]);
+
+    const sentences = state.split("\n");
+    const lastSentence = sentences.pop();
+    return (
+        <main className={styles.container}>
+            <div className={typewriterStyles.shell}>
+                {sentences.map((sen, i) => (
+                    <p key={i}>{sen}</p>
+                ))}
+                <p>
+                    {lastSentence}
+                    <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
+                </p>
+            </div>
+            <p style={{color: "green"}}>
+                {state2}
+                <Cursor className={typewriterStyles.Cursor} typing={isTyping2} />
+            </p>
+        </main>
+    );
 }
 
 export default temp;
