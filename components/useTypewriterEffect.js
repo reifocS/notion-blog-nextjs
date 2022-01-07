@@ -14,7 +14,7 @@ export function useCursor(typing) {
     return () => {
       clearInterval(id);
     };
-  }, []);
+  }, [typing]);
 
   return typing || toggler ? "|" : ""
 }
