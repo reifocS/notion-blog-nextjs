@@ -1,11 +1,10 @@
 import React from "react";
-import styles from "./Typewriter.module.css"
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-export function Cursor({ typing, className }) {
+export function useCursor(typing) {
   const [toggler, setToggler] = React.useState(true);
   React.useEffect(() => {
     const id = setInterval(() => {
@@ -17,14 +16,7 @@ export function Cursor({ typing, className }) {
     };
   }, []);
 
-  return (
-    <span
-      style={{ visibility: typing || toggler ? "visible" : "hidden" }}
-      className={styles.cursor}
-    >
-      |
-    </span>
-  );
+  return typing || toggler ? "|" : ""
 }
 
 const initialState = {

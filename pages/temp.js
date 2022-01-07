@@ -1,13 +1,14 @@
 import styles from "./index.module.css";
 import React from "react";
 import useTypewriterEffect, {
-    Cursor,
     getTypewriter,
+    useCursor,
 } from "../components/useTypewriterEffect";
 import typewriterStyles from "../components/Typewriter.module.css";
 
 function temp() {
     const [state, dispatch, isTyping] = useTypewriterEffect();
+    const cursor = useCursor(isTyping);
 
     React.useEffect(() => {
         getTypewriter(dispatch)
@@ -29,13 +30,15 @@ function temp() {
     const lastSentence = sentences.pop();
     return (
         <main className={styles.container}>
+            <input type="text" placeholder={lastSentence}/>
+
             <div className={typewriterStyles.shell}>
                 {sentences.map((sen, i) => (
                     <p key={i}><span style={{color:"cyan"}}>$</span> {sen}</p>
                 ))}
                 <p>
                     <span style={{color:"cyan"}}>$</span> {lastSentence}
-                    <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
+                    <span className={typewriterStyles.cursor} style={{visibility: cursor ? "visible" : "hidden"}}>|</span>
                 </p>
             </div>
         </main>
