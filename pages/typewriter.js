@@ -3,7 +3,7 @@ import React from "react";
 import useTypewriterEffect, {
     getTypewriter,
     useCursor,
-} from "../components/useTypewriterEffect";
+} from "use-typewriter-effect";
 import typewriterStyles from "../components/Typewriter.module.css";
 
 function temp() {
