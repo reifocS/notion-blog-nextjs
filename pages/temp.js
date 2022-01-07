@@ -10,18 +10,18 @@ function temp() {
     const [state, dispatch, isTyping] = useTypewriterEffect();
 
     React.useEffect(() => {
-        getTypewriter(dispatch).type("Hello world!\n")
+        getTypewriter(dispatch)
+            .type("Hello world!\n")
             .type(" How are you?")
             .pauseFor(1000)
             .deleteAll()
-            .type("This is a typewriter component")
+            .type("This is a typewriter effect")
             .pauseFor(1000)
-            .deleteSome(9)
+            .deleteSome(6)
             .type("hook!")
             .pauseFor(1000)
             .deleteAll()
             .setLoop(true)
-            .setDelay(500)
             .trigger()
     }, [dispatch]);
 
@@ -31,10 +31,10 @@ function temp() {
         <main className={styles.container}>
             <div className={typewriterStyles.shell}>
                 {sentences.map((sen, i) => (
-                    <p key={i}>{sen}</p>
+                    <p key={i}><span style={{color:"cyan"}}>$</span> {sen}</p>
                 ))}
                 <p>
-                    {lastSentence}
+                    <span style={{color:"cyan"}}>$</span> {lastSentence}
                     <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
                 </p>
             </div>

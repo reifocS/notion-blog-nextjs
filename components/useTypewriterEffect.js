@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./Typewriter.module.css"
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
@@ -19,7 +20,7 @@ export function Cursor({ typing, className }) {
   return (
     <span
       style={{ visibility: typing || toggler ? "visible" : "hidden" }}
-      className={className}
+      className={styles.cursor}
     >
       |
     </span>
@@ -139,7 +140,6 @@ function reducer(state, action) {
       };
     }
     case TW_ACTIONS.TRIGGER: {
-      console.log(state, action)
       return {
         ...state,
         loop: action.payload.loop,
@@ -222,7 +222,7 @@ function useTypewriterEffect() {
 }
 
 /**
- * Exposes a declarative api to manipulate the typewriter, it allows to build an event queue before updating the state
+ * Exposes a declarative api to configure the typewriter.
  * @param {*} dispatch React dispatch returned by the useTypewriter hook
  * @returns
  */

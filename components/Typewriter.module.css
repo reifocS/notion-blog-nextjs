@@ -1,9 +1,8 @@
 .shell {
-  font-family: "Inter", sans-serif;
-  color: green;
-  font-size: 3rem;
+  font-family: "monospace", sans-serif;
+  font-size: 2.5rem;
 }
 
 .cursor {
-    font-weight: 200;
+    opacity: 0.5;
 }
