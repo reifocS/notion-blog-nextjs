@@ -8,23 +8,22 @@ import typewriterStyles from "../components/Typewriter.module.css";
 
 function temp() {
     const [state, dispatch, isTyping] = useTypewriterEffect();
-    const [state2, dispatch2, isTyping2] = useTypewriterEffect();
 
     React.useEffect(() => {
-        getTypewriter(dispatch).type("Hello world!")
-            .pauseFor(1000)
+        getTypewriter(dispatch).type("Hello world!\n")
             .type(" How are you?")
-            .deleteSome(30)
-            .setLoop(true)
-            .trigger();
-
-        getTypewriter(dispatch2).type("Hello universe!")
             .pauseFor(1000)
-            .type(" How are you?")
-            .deleteSome(30)
+            .deleteAll()
+            .type("This is a typewriter component")
+            .pauseFor(1000)
+            .deleteSome(9)
+            .type("hook!")
+            .pauseFor(1000)
+            .deleteAll()
             .setLoop(true)
-            .trigger();
-    }, [dispatch, dispatch2]);
+            .setDelay(500)
+            .trigger()
+    }, [dispatch]);
 
     const sentences = state.split("\n");
     const lastSentence = sentences.pop();
@@ -39,10 +38,6 @@ function temp() {
                     <Cursor className={typewriterStyles.Cursor} typing={isTyping} />
                 </p>
             </div>
-            <p style={{color: "green"}}>
-                {state2}
-                <Cursor className={typewriterStyles.Cursor} typing={isTyping2} />
-            </p>
         </main>
     );
 }

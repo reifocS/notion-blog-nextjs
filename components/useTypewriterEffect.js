@@ -26,7 +26,13 @@ export function Cursor({ typing, className }) {
   );
 }
 
-const initialState = { eventQueue: [], text: "", history: [], loop: false };
+const initialState = {
+  eventQueue: [],
+  text: "",
+  history: [],
+  loop: false,
+  delay: null,
+};
 
 const TW_ACTIONS = {
   CONSUME: "consume",
@@ -49,15 +55,16 @@ const TW_EVENT = {
 };
 
 function reducer(state, action) {
+  let events;
   switch (action.type) {
     case TW_EVENT.TYPE:
-      const events = action.payload.split("").map((character) => ({
+      events = action.payload.split("").map((character) => ({
         event: TW_EVENT.TYPE_CHARACTER,
         value: character,
       }));
       return { ...state, eventQueue: [...state.eventQueue, ...events] };
     case TW_EVENT.DELETE_CHARACTER: {
-      const events = [];
+      events = [];
       for (let i = 0; i < action.payload; ++i) {
         events.push({
           event: TW_EVENT.DELETE_CHARACTER,
@@ -66,12 +73,15 @@ function reducer(state, action) {
       return { ...state, eventQueue: [...state.eventQueue, ...events] };
     }
     case TW_EVENT.DELETE_ALL:
+      events = [];
+      for (let i = 0; i < state.text.length; ++i) {
+        events.push({
+          event: TW_EVENT.DELETE_CHARACTER,
+        });
+      }
       return {
         ...state,
-        eventQueue: [
-          ...state.eventQueue,
-          { event: TW_EVENT.DELETE_ALL, value: null },
-        ],
+        eventQueue: [...state.eventQueue, ...events],
       };
     case TW_ACTIONS.CONSUME: {
       return {
@@ -129,10 +139,12 @@ function reducer(state, action) {
       };
     }
     case TW_ACTIONS.TRIGGER: {
+      console.log(state, action)
       return {
         ...state,
         loop: action.payload.loop,
         eventQueue: [...state.eventQueue, ...action.payload.eventQueue],
+        delay: action.payload.delay
       };
     }
     default:
@@ -145,10 +157,9 @@ function useTypewriterEffect() {
     ...initialState,
   });
 
-  const { eventQueue, text, history, loop } = state;
+  const { eventQueue, text, history, loop, delay } = state;
   const lastFrameRef = React.useRef();
   const pauseTimeRef = React.useRef();
-
   React.useEffect(() => {
     function step() {
       if (!eventQueue.length) {
@@ -169,8 +180,8 @@ function useTypewriterEffect() {
       } else {
         pauseTimeRef.current = null;
       }
-      const feelsNatural = getRandomArbitrary(60, 120);
-      if (delta < feelsNatural) {
+      const d = delay ? delay : getRandomArbitrary(60, 120);
+      if (delta < d) {
         return;
       }
       lastFrameRef.current = now;
@@ -200,7 +211,7 @@ function useTypewriterEffect() {
     let raf = requestAnimationFrame(step);
 
     return () => cancelAnimationFrame(raf);
-  }, [eventQueue, loop]);
+  }, [eventQueue, loop, delay]);
 
   return [
     text,
@@ -210,9 +221,15 @@ function useTypewriterEffect() {
   ];
 }
 
+/**
+ * Exposes a declarative api to manipulate the typewriter, it allows to build an event queue before updating the state
+ * @param {*} dispatch React dispatch returned by the useTypewriter hook
+ * @returns
+ */
 export function getTypewriter(dispatch) {
   let eventQueue = [];
   let loop = false;
+  let delay = null;
   return {
     type(characters) {
       eventQueue = reducer(
@@ -232,8 +249,19 @@ export function getTypewriter(dispatch) {
       return this;
     },
     deleteAll() {
+      let amountToDelete = eventQueue.filter(
+        (ev) => ev.event === TW_EVENT.TYPE_CHARACTER
+      ).length;
+      amountToDelete -= eventQueue.filter(
+        (ev) => ev.event === TW_EVENT.DELETE_CHARACTER
+      ).length;
+      let dummyString = "";
+      for (let i = 0; i < amountToDelete; ++i) {
+        dummyString += "i";
+      }
+
       eventQueue = reducer(
-        { eventQueue },
+        { eventQueue, text: dummyString },
         { type: TW_EVENT.DELETE_ALL }
       ).eventQueue;
       return this;
@@ -255,6 +283,7 @@ export function getTypewriter(dispatch) {
 
     reset() {
       eventQueue = [];
+      delay = null;
       return this;
     },
 
@@ -263,9 +292,17 @@ export function getTypewriter(dispatch) {
       return this;
     },
 
+    setDelay(seconds) {
+      delay = seconds;
+      return this;
+    },
+
     trigger() {
-      // update state with builded events to trigger render
-      dispatch({ type: TW_ACTIONS.TRIGGER, payload: { eventQueue, loop } });
+      // update state
+      dispatch({
+        type: TW_ACTIONS.TRIGGER,
+        payload: { eventQueue, loop, delay },
+      });
       // reset eventQueue
       this.reset();
       return this;

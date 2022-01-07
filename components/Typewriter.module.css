@@ -1,6 +1,7 @@
 .shell {
   font-family: "Inter", sans-serif;
-  font-weight: bold;
+  color: green;
+  font-size: 3rem;
 }
 
 .cursor {
