@@ -32,21 +32,28 @@ const metaCode = `function Code() {
     );
   }`;
 function Code() {
-  const [code, dispatch] = useTypewriterEffect();
+  const [code, dispatch, typing] = useTypewriterEffect();
+  const cursor = useCursor(typing);
 
   React.useEffect(() => {
     getTypewriter(dispatch).type(metaCode).trigger();
   }, [dispatch]);
 
+  const highlightedCode = React.useMemo(
+    () => Prism.highlight(code, Prism.languages["javascript"], "javascript"),
+    [code]
+  );
+
+  const cursorToHtml = `<span
+  class="${typewriterStyles.cursor} token punctuation"
+  style="visibility: ${cursor ? "visible" : "hidden"};"
+>|</span>`;
+
   return (
     <pre className="language-jsx">
       <code
         dangerouslySetInnerHTML={{
-          __html: Prism.highlight(
-            code + "|",
-            Prism.languages["javascript"],
-            "javascript"
-          ),
+          __html: highlightedCode + cursorToHtml,
         }}
         className={`language-jsx`}
       />
