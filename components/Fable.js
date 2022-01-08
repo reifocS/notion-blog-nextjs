@@ -1,4 +1,4 @@
-import styles from "./index.module.css";
+import styles from "../pages/index.module.css";
 import React from "react";
 import useTypewriterEffect, {
     getTypewriter,
@@ -16,15 +16,6 @@ const lineByLine = fable.split("\n");
 function Reader() {
   const [state, dispatch, typing, history] = useTypewriterEffect();
   const [storyState, setStoryState] = React.useState(0);
-  React.useEffect(() => {
-    getTypewriter(dispatch)
-      .setDelay(10)
-      .type(lineByLine[0])
-      .historize()
-      .trigger();
-    setStoryState((prev) => prev + 1);
-  }, [dispatch]);
-
   return (
     <div
       style={{
@@ -35,9 +26,10 @@ function Reader() {
         padding: "16px",
         borderRadius: "16px",
         height: "90vh",
-        fontSize: "1.5rem",
+        fontSize: "1rem",
         overflow: "auto",
         fontStyle: "italic",
+        fontFamily: "auto"
       }}
     >
       {history.map((p, i) => (
@@ -62,14 +54,14 @@ function Reader() {
         style={{ backgroundColor: "transparent", border: "none" }}
         onClick={() => {
           getTypewriter(dispatch)
-            .setDelay(10)
+            .setDelay(30)
             .type(lineByLine[storyState])
             .historize()
             .trigger();
           setStoryState((prev) => prev + 1);
         }}
       >
-        {storyState >= lineByLine.length ? "The end" : "continue..."}
+        {storyState === 0 ? "Start story" : storyState >= lineByLine.length ? "The end" : "continue..."}
       </button>
     </div>
   );
