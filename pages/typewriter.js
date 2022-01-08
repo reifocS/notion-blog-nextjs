@@ -5,7 +5,7 @@ import useTypewriterEffect, {
     useCursor,
 } from "use-typewriter-effect";
 import typewriterStyles from "../components/Typewriter.module.css";
-import Fable from "../components/fable";
+import Fable from "../components/Fable";
 
 function Typewriter() {
     const [state, dispatch, isTyping] = useTypewriterEffect();
