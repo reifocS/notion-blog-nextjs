@@ -1,9 +1,9 @@
 import styles from "./index.module.css";
-import React, { useRef } from "react";
+import React from "react";
 import useTypewriterEffect, {
   getTypewriter,
   useCursor,
-} from "use-typewriter-effect";
+} from "../components/useTypewriterEffect";
 import typewriterStyles from "../components/Typewriter.module.css";
 import Fable from "../components/Fable";
 import Prism from "prismjs";
@@ -12,7 +12,7 @@ import "prismjs/components/prism-jsx.min";
 const metaCode = `function Code() {
     const [code, dispatch] = useTypewriterEffect();
   
-    React.useEffect(() => {
+      React.useEffect(() => {
       getTypewriter(dispatch).type(metaCode).trigger();
     }, [dispatch]);
   
@@ -36,7 +36,7 @@ function Code() {
   const cursor = useCursor(typing);
 
   React.useEffect(() => {
-    getTypewriter(dispatch).type(metaCode).trigger();
+    getTypewriter(dispatch).type(metaCode).replaceSpaceByTabs().trigger();
   }, [dispatch]);
 
   const highlightedCode = React.useMemo(

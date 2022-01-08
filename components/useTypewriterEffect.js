@@ -16,7 +16,7 @@ export function useCursor(typing) {
     };
   }, [typing]);
 
-  return typing || toggler ? "|" : ""
+  return typing || toggler ? "|" : "";
 }
 
 const initialState = {
@@ -136,7 +136,7 @@ function reducer(state, action) {
         ...state,
         loop: action.payload.loop,
         eventQueue: [...state.eventQueue, ...action.payload.eventQueue],
-        delay: action.payload.delay
+        delay: action.payload.delay,
       };
     }
     default:
@@ -289,6 +289,42 @@ export function getTypewriter(dispatch) {
       return this;
     },
 
+    replaceSpaceByTabs(tabIndent = 2) {
+      let newQueue = [];
+      const tab = "";
+      for (let i = 0; i < tabIndent; ++i) {
+        tab += " ";
+      }
+      const ignoreNext = 0;
+      for (let i = 0; i < eventQueue.length; ++i) {
+        if (ignoreNext > 0) {
+          ignoreNext--;
+          continue;
+        }
+        const actual = eventQueue[i];
+        if (actual.value === " " && i + tabIndent < eventQueue.length) {
+          let allSpace = true;
+          for (let j = i + 1; j <= i + tabIndent; ++j) {
+            if (eventQueue[j] !== " ") {
+              allSpace = false;
+            }
+          }
+          if (allSpace) {
+            ignoreNext = tabIndent - 1;
+            newQueue.push({
+              ...actual,
+              value: tab,
+            });
+          } else {
+            newQueue.push(actual);
+          }
+        } else {
+          newQueue.push(actual);
+        }
+      }
+      eventQueue = newQueue;
+      return this;
+    },
     trigger() {
       // update state
       dispatch({
