@@ -5,15 +5,15 @@ import useTypewriterEffect, {
     useCursor,
 } from "use-typewriter-effect";
 import typewriterStyles from "../components/Typewriter.module.css";
+import Fable from "../components/fable";
 
-function temp() {
+function Typewriter() {
     const [state, dispatch, isTyping] = useTypewriterEffect();
     const cursor = useCursor(isTyping);
 
     React.useEffect(() => {
         getTypewriter(dispatch)
-            .type("Hello world!\n")
-            .type(" How are you?")
+            .type("Hello world!\n How are you?")
             .pauseFor(1000)
             .deleteAll()
             .type("This is a typewriter effect")
@@ -30,8 +30,6 @@ function temp() {
     const lastSentence = sentences.pop();
     return (
         <main className={styles.container}>
-            <input type="text" placeholder={lastSentence}/>
-
             <div className={typewriterStyles.shell}>
                 {sentences.map((sen, i) => (
                     <p key={i}><span style={{color:"cyan"}}>$</span> {sen}</p>
@@ -41,8 +39,9 @@ function temp() {
                     <span className={typewriterStyles.cursor} style={{visibility: cursor ? "visible" : "hidden"}}>|</span>
                 </p>
             </div>
+            <Fable/>
         </main>
     );
 }
 
-export default temp;
+export default Typewriter;
