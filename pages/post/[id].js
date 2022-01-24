@@ -5,7 +5,7 @@ import Link from "next/link";
 import { databaseId } from "../index.js";
 import styles from "./post.module.css";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { okaidia as theme } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 export const Text = ({ text }) => {
   if (!text) {
@@ -119,7 +119,7 @@ const renderBlock = (block) => {
       const code = value.text[0]?.plain_text;
       const lang = value.language;
       return (
-        <SyntaxHighlighter key={id} language={lang} style={dark}>
+        <SyntaxHighlighter key={id} language={lang} style={theme}>
           {code}
         </SyntaxHighlighter>
       );
