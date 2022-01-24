@@ -6,8 +6,27 @@ import useTypewriterEffect, {
 } from "../components/useTypewriterEffect";
 import typewriterStyles from "../components/Typewriter.module.css";
 import Fable from "../components/Fable";
-import Prism from "prismjs";
-import "prismjs/components/prism-jsx.min";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { darcula } from "react-syntax-highlighter/dist/cjs/styles/hljs";
+
+const cv = `const skills = [
+  "javascript",
+  "HTML",
+  "CSS",
+  "React",
+  "Java",
+  "Spring",
+  "Python",
+];
+const job = "full stack developper";
+const study = "computer science";
+
+const VincentEscoffier = {
+  skills,
+  job,
+  study,
+  lookingFor: "Summer internship",
+};`;
 
 const metaCode = `function Code() {
     const [code, dispatch] = useTypewriterEffect();
@@ -33,32 +52,22 @@ const metaCode = `function Code() {
   }`;
 function Code() {
   const [code, dispatch, typing] = useTypewriterEffect();
-  const cursor = useCursor(typing);
 
   React.useEffect(() => {
-    getTypewriter(dispatch).type(metaCode).replaceSpaceByTabs().trigger();
+    getTypewriter(dispatch)
+      .type(cv)
+      .pauseFor(1000)
+      .type("\nconsole.log('feel free to cnotact")
+      .deleteSome("7")
+      .type("contact me!')")
+      .replaceSpaceByTabs()
+      .trigger();
   }, [dispatch]);
 
-  const highlightedCode = React.useMemo(
-    () => Prism.highlight(code, Prism.languages["javascript"], "javascript"),
-    [code]
-  );
-
-  const cursorToHtml = `<span
-  class="${typewriterStyles.cursor} token punctuation"
-  style="visibility: ${cursor ? "visible" : "hidden"};"
->|</span>`;
-
   return (
-    <pre className="language-jsx">
-      <code
-        dangerouslySetInnerHTML={{
-          __html: highlightedCode + cursorToHtml,
-        }}
-        className={`language-jsx`}
-      />
-    </pre>
-  );
+    <SyntaxHighlighter language="javascript" style={darcula}>
+    {code}
+  </SyntaxHighlighter>  );
 }
 
 function Typewriter() {

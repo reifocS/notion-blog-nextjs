@@ -4,8 +4,8 @@ import { getDatabase, getPage, getBlocks } from "../../lib/notion";
 import Link from "next/link";
 import { databaseId } from "../index.js";
 import styles from "./post.module.css";
-import Prism from "prismjs";
-import "prismjs/components/prism-jsx.min";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { dark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 export const Text = ({ text }) => {
   if (!text) {
@@ -119,30 +119,14 @@ const renderBlock = (block) => {
       const code = value.text[0]?.plain_text;
       const lang = value.language;
       return (
-        <div key={id}
-          style={{
-            marginBottom: "1.75rem",
-            borderRadius: "10px",
-            background: "#2d2d2d",
-            overflow: "auto"
-          }}
-        >
-          <pre
-            className={`language-${value.language === "javascript" ? "jsx" : value.language
-              }`}
-          >
-            <code
-            dangerouslySetInnerHTML={{__html: Prism.highlight(code, Prism.languages[lang], value.language)}}
-              className={`language-${value.language === "javascript" ? "jsx" : value.language
-                }`}
-            />
-              
-          </pre>
-        </div>
+        <SyntaxHighlighter key={id} language={lang} style={dark}>
+          {code}
+        </SyntaxHighlighter>
       );
     default:
-      return `❌ Unsupported block (${type === "unsupported" ? "unsupported by Notion API" : type
-        })`;
+      return `❌ Unsupported block (${
+        type === "unsupported" ? "unsupported by Notion API" : type
+      })`;
   }
 };
 
